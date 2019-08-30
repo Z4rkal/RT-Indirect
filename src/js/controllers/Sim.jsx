@@ -5,7 +5,7 @@ import Horizon from '../fields/Horizon';
 
 import buildGrid from '../lib/buildGrid';
 
-const SIZE = 40;
+const SIZE = 100;
 
 class Sim extends Component {
     constructor() {
@@ -39,8 +39,8 @@ class Sim extends Component {
             <>
                 <button id='regen-btn' onClick={this.updateGrid}>Regenerate</button>
                 <div id='sim-container'>
-                    <Horizon grid={this.state.grid} />
-                    <Bird grid={this.state.grid} />
+                    <Horizon grid={this.state.grid} scale={400/SIZE}/>
+                    <Bird grid={this.state.grid} scale={400/SIZE}/>
                 </div>
             </>
         );

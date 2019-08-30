@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 const HEIGHT = 400;
 const WIDTH = 400;
 
+const alpha = false;
+
 class Horizon extends Component {
     constructor() {
         super();
@@ -11,31 +13,31 @@ class Horizon extends Component {
     }
 
     buildTopography(grid) {
-        const spacing = grid.length / 10;
+        const spacing = grid.length / 50;
         const height = grid.length, width = grid.length;
 
         let sum = 0;
         let lines = [];
 
         for (let y = 0; y < height; y += spacing) {
-            lines[y] = [];
+            lines[y / spacing] = [];
             for (let x = 0; x < width; x++) {
                 sum = 0;
                 for (let i = 0; i < spacing && i + y < height; i++) {
                     sum += grid[y + i][x];
                 }
-                lines[y][x] = sum / spacing;
+                lines[y / spacing][x] = sum / spacing;
             }
         }
 
         return (
             <>
                 {lines.map((col, cIndex) => {
-                    let hex = 255 - cIndex * 5;
-                    return (<path key={`line ${cIndex}`} d={`M 0 400 L 0 ${400 - (col[0]*400)} ${col.map((value, rIndex) => {
+                    let hex = 255 - (cIndex * 4);
+                    return (<path key={`line ${cIndex}`} d={`M 0 400 L 0 ${400 - (col[0] * 400)} ${col.reduce((prev,value, rIndex) => {
                         value = 400 - (value * 400)
-                        return (`L ${rIndex * 10 + 10} ${value} `)
-                    })} L 400 400`} stroke={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} fill={`rgb(${hex},${hex * 1.25},${hex * 1.25},${1 / ((cIndex + 1)/3)})`} />);
+                        return prev + (` L ${rIndex * this.props.scale + this.props.scale} ${value}`)
+                    },'')} L 400 400`} stroke={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} fill={`rgb(${hex},${hex * 1.25},${hex * 1.25}${alpha ? `,${1 / ((cIndex + 1) / 1)})` : ``}`} />);
                 })}
             </>
         )

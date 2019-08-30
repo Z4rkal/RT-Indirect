@@ -24,11 +24,13 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
+    "alea": "^1.0.0",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "sass": "^1.22.10"
+    "sass": "^1.22.10",
+    "simplex-noise": "^2.4.0"
   },
   "devDependencies": {
     "@babel/register": "^7.5.5",

@@ -17,7 +17,9 @@ class Sim extends Component {
 
         this.updateGrid = this.updateGrid.bind(this);
     }
-
+    //TODO: pass noise parameters into buildGrid and have them be user input,
+    //Keep the same seed until regen is hit
+    //Move on to implementing the actual intent of the project
     componentDidMount() {
         let grid = buildGrid(SIZE);
 

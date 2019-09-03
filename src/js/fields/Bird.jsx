@@ -7,10 +7,27 @@ class Bird extends Component {
     constructor() {
         super();
 
-        this.renderGrid = this.renderGrid.bind(this);
+        this.renderNoise = this.renderNoise.bind(this);
+        this.renderTopography = this.renderTopography.bind(this);
     }
 
-    renderGrid(grid) {
+    renderTopography(grid) {
+        return (
+            <>
+                {grid.map((col, cIndex) => (
+                    <React.Fragment key={`Column: ${cIndex}`} >
+                        {col.map((value, rIndex) => {
+                            value = Math.round(value * 10);
+                            let hex = 10 + value * 25;
+                            return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height='10' width='10' fill={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} />);
+                        })}
+                    </React.Fragment>
+                ))}
+            </>
+        )
+    }
+
+    renderNoise(grid) {
         return (
             <>
                 {grid.map((col, cIndex) => (
@@ -30,7 +47,7 @@ class Bird extends Component {
             <div id='bird-container'>
                 <label id='bird-label' htmlFor='bird-svg'>Bird's Eye View</label>
                 <svg id='bird-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`}>
-                    {this.renderGrid(this.props.grid)}
+                    {this.props.showNoise ? this.renderNoise(this.props.grid) : this.renderTopography(this.props.grid)}
                 </svg>
             </div>
         );

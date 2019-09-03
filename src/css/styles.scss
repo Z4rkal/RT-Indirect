@@ -44,9 +44,11 @@
   justify-content: space-evenly;
 }
 
-#bird-svg,
+#bird-svg {
+  border: 4px ridge #55c8d8;
+}
 #horizon-svg {
-  border: 4px ridge #a75868;
+  border: 4px ridge #f7c8d8;
 }
 
 #bird-container,
@@ -60,7 +62,12 @@
   justify-content: space-evenly;
 }
 
-#regen-btn {
+#sim-btn-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.sim-btn {
     padding: 10px;
     min-width: 25%;
     
@@ -68,8 +75,59 @@
 
     border: 2px solid #333333;
     border-radius: 3px;
-
-    display: flex;
-    justify-content: center;
+    
     margin: 2rem auto;
+}
+
+#direction-btn-container {
+  width: 150px;
+  height: 150px;
+
+  position: relative;
+}
+
+.dir-btn {
+    font-size: 1.4rem;
+    border: none;
+
+    position: absolute;
+
+}
+
+.dir-btn:focus {
+  outline: none;
+}
+
+#north {
+  left: 61px;
+  top: 10px;
+}
+
+#east {
+  right: 15px;
+  top: 61px;
+}
+
+#south {
+  left: 61px;
+  bottom: 15px;
+}
+
+#west {
+  left: 10px;
+  top: 61px;
+}
+
+#direction-svg {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+}
+
+#arrow-path {
+  z-index: 9;
+}
+
+.current-dir {
+  color: #f73979;
 }

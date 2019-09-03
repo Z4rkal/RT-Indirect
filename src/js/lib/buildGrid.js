@@ -2,9 +2,9 @@ import SimplexNoise from 'simplex-noise';
 import Alea from 'alea';
 
 //Builds an elavation map using simplex-noise
-function buildGrid(size) {
-    var random = new Alea();
-    const simplex = new SimplexNoise(random);
+function buildGrid(size, simplexNoise, seed, oct, pow) {
+    var random = seed || new Alea();
+    const simplex = simplexNoise || new SimplexNoise(random);
 
     function noise(nx, ny) {
         return ((simplex.noise2D(nx, ny) / 2) + 0.5);
@@ -17,13 +17,13 @@ function buildGrid(size) {
         grid[y] = [];
         for (let x = 0; x < size; x++) {
             let nx = x / size - 0.5, ny = y / size - 0.5;
-            
-            let e1 = 0.80,
-                e2 = 0.45,
-                e3 = 0.14,
-                e4 = 0.07,
-                e5 = 0.03,
-                e6 = 0.01;
+
+            let e1 = oct[0] || 0.80,
+                e2 = oct[1] || 0.45,
+                e3 = oct[2] || 0.14,
+                e4 = oct[3] || 0.07,
+                e5 = oct[4] || 0.03,
+                e6 = oct[5] || 0.01;
 
             let e = (e1 * noise(1 * nx, 1 * ny)
                 + e2 * noise(2 * nx, 2 * ny)
@@ -31,7 +31,7 @@ function buildGrid(size) {
                 + e4 * noise(8 * nx, 8 * ny)
                 + e5 * noise(16 * nx, 16 * ny)
                 + e6 * noise(32 * nx, 32 * ny)) / (e1 + e2 + e3 + e4 + e5 + e6);
-            grid[y][x] = Math.pow(e, 1.38);
+            grid[y][x] = Math.pow(e, pow || 1.38);
         }
     }
 

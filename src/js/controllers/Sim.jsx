@@ -33,7 +33,7 @@ class Sim extends Component {
     //Keep the same seed until regen is hit
     //Move on to implementing the actual intent of the project
     componentDidMount() {
-        const random = new Alea();
+        const random = new Alea()();
         const simplex = new SimplexNoise(random);
 
         const grid = buildGrid(SIZE, simplex, random, this.state.oct, this.state.pow);
@@ -43,6 +43,12 @@ class Sim extends Component {
             simplex: simplex,
             grid: grid
         });
+    }
+
+    componentDidUpdate(prevProps,prevState) {
+        if(prevState.simplex !== this.state.simplex) {
+            this.updateGrid();
+        }
     }
 
     updateInput(field, value, index) {
@@ -82,14 +88,12 @@ class Sim extends Component {
     }
 
     updateSeed() {
-        const random = new Alea();
+        let random = new Alea()();
 
         this.setState({
             noiseSeed: random,
             simplex: new SimplexNoise(random)
         });
-
-        this.updateGrid();
     }
 
     updateGrid() {

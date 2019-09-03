@@ -7,8 +7,9 @@ class Bird extends Component {
     constructor() {
         super();
 
-        this.renderNoise = this.renderNoise.bind(this);
         this.renderTopography = this.renderTopography.bind(this);
+        this.renderNoise = this.renderNoise.bind(this);
+        this.renderX = this.renderX.bind(this);
     }
 
     renderTopography(grid) {
@@ -42,12 +43,34 @@ class Bird extends Component {
         )
     }
 
+    renderX(start) {
+        const x = start[0];
+        const y = start[1];
+        const halfLength = 10;
+
+        let path = `M ${x} ${y}`;
+        path += ` L ${Math.min(Math.max(x + halfLength, 0), WIDTH)} ${Math.min(Math.max(y + halfLength, 0), HEIGHT)}`;
+        path += `M ${x} ${y}`;
+        path += ` L ${Math.min(Math.max(x - halfLength, 0), WIDTH)} ${Math.min(Math.max(y + halfLength, 0), HEIGHT)}`;
+        path += `M ${x} ${y}`;
+        path += ` L ${Math.min(Math.max(x + halfLength, 0), WIDTH)} ${Math.min(Math.max(y - halfLength, 0), HEIGHT)}`;
+        path += `M ${x} ${y}`;
+        path += ` L ${Math.min(Math.max(x - halfLength, 0), WIDTH)} ${Math.min(Math.max(y - halfLength, 0), HEIGHT)}`;
+
+        return (
+            <path d={path} stroke='#f73979' strokeWidth='2' strokeLinecap='round' fill='transparent' />
+        )
+    }
+
     render() {
+        const { start, grid, showNoise, selectPosition } = this.props;
+
         return (
             <div id='bird-container'>
                 <label id='bird-label' htmlFor='bird-svg'>Bird's Eye View</label>
-                <svg id='bird-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`}>
-                    {this.props.showNoise ? this.renderNoise(this.props.grid) : this.renderTopography(this.props.grid)}
+                <svg id='bird-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`} onClick={(e) => { e.persist(); selectPosition(e); }}>
+                    {showNoise ? this.renderNoise(grid) : this.renderTopography(grid)}
+                    {typeof start === 'object' && start[0] >= 0 && start[1] >= 0 ? this.renderX(start) : null}
                 </svg>
             </div>
         );

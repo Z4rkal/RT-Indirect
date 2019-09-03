@@ -26,13 +26,15 @@ class Sim extends Component {
             oct4: 0.07,
             oct5: 0.03,
             oct6: 0.01,
-            pow: 4.7
+            pow: 4.7,
+            start: [-1, -1]
         }
 
         this.toggleInput = this.toggleInput.bind(this);
         this.updateSeed = this.updateSeed.bind(this);
         this.updateGrid = this.updateGrid.bind(this);
         this.renderArrow = this.renderArrow.bind(this);
+        this.selectPosition = this.selectPosition.bind(this);
     }
     //TODO: pass noise parameters into buildGrid and have them be user input,
     //Keep the same seed until regen is hit
@@ -131,6 +133,17 @@ class Sim extends Component {
         )
     }
 
+    selectPosition(event) {
+        if (event.nativeEvent) {
+            const x = Math.min(Math.max(event.nativeEvent.offsetX,0),400);
+            const y = Math.min(Math.max(event.nativeEvent.offsetY,0),400);
+
+            this.setState({
+                start: [x, y]
+            });
+        }
+    }
+
     render() {
         const { oct1, oct2, oct3, oct4, oct5, oct6, pow } = this.state;
 
@@ -180,8 +193,8 @@ class Sim extends Component {
                     <button id='regen-btn' className='sim-btn' onClick={this.updateSeed}>Regenerate</button>
                 </div>
                 <div id='sim-container'>
-                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} />
-                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} />
+                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} start={this.state.start} />
+                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} start={this.state.start} selectPosition={this.selectPosition} />
                 </div>
             </>
         );

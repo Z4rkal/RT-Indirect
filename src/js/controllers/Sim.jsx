@@ -20,8 +20,13 @@ class Sim extends Component {
             horizonDirection: 'north',
             noiseSeed: undefined,
             simplex: undefined,
-            oct: [0.80, 0.45, 0.14, 0.07, 0.03, 0.01],
-            pow: 1.38
+            oct1: 0.80,
+            oct2: 0.45,
+            oct3: 0.14,
+            oct4: 0.07,
+            oct5: 0.03,
+            oct6: 0.01,
+            pow: 4.7
         }
 
         this.toggleInput = this.toggleInput.bind(this);
@@ -36,7 +41,8 @@ class Sim extends Component {
         const random = new Alea()();
         const simplex = new SimplexNoise(random);
 
-        const grid = buildGrid(SIZE, simplex, random, this.state.oct, this.state.pow);
+        const oct = [this.state.oct1, this.state.oct2, this.state.oct3, this.state.oct4, this.state.oct5, this.state.oct6];
+        let grid = buildGrid(SIZE, simplex, random, oct, this.state.pow);
 
         this.setState({
             noiseSeed: random,
@@ -45,31 +51,25 @@ class Sim extends Component {
         });
     }
 
-    componentDidUpdate(prevProps,prevState) {
-        if(prevState.simplex !== this.state.simplex) {
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.simplex !== this.state.simplex
+            || prevState.oct1 !== this.state.oct1
+            || prevState.oct2 !== this.state.oct2
+            || prevState.oct3 !== this.state.oct3
+            || prevState.oct4 !== this.state.oct4
+            || prevState.oct5 !== this.state.oct5
+            || prevState.oct6 !== this.state.oct6
+            || prevState.pow !== this.state.pow) {
             this.updateGrid();
         }
     }
 
-    updateInput(field, value, index) {
+    updateInput(field, value) {
         if (this.state[field] === undefined) throw new Error(`Invalid field passed into updateInput in Sim.jsx`);
 
-        if (index !== undefined) {
-            let array = this.state[field];
-
-            array[index] = value;
-
-            this.setState({
-                [field]: array
-            });
-        }
-        else {
-            this.setState({
-                [field]: value
-            });
-        }
-
-        this.updateGrid();
+        this.setState({
+            [field]: value
+        });
     }
 
     toggleInput(field, value) {
@@ -97,7 +97,8 @@ class Sim extends Component {
     }
 
     updateGrid() {
-        let grid = buildGrid(SIZE, this.state.simplex, this.state.noiseSeed, this.state.oct, this.state.pow);
+        const oct = [this.state.oct1, this.state.oct2, this.state.oct3, this.state.oct4, this.state.oct5, this.state.oct6];
+        let grid = buildGrid(SIZE, this.state.simplex, this.state.noiseSeed, oct, this.state.pow);
 
         this.setState({
             grid: grid
@@ -131,38 +132,52 @@ class Sim extends Component {
     }
 
     render() {
-        const { oct, pow } = this.state;
+        const { oct1, oct2, oct3, oct4, oct5, oct6, pow } = this.state;
 
         return (
             <>
                 <div id='noise-options-container'>
                     <p id='noise-desc'>Noise Map Parameters:</p>
-                    <label>e1 ({oct[0].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[0] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 0)}></input>
-                    <label>e2 ({oct[1].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[1] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 1)}></input>
-                    <label>e3 ({oct[2].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[2] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 2)}></input>
-                    <label>e4 ({oct[3].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[3] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 3)}></input>
-                    <label>e5 ({oct[4].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[4] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 4)}></input>
-                    <label>e6 ({oct[5].toFixed(2)}):</label>
-                    <input type='range' min='0' max='100' value={oct[5] * 100} onChange={(e) => this.updateInput('oct', e.target.value / 100, 5)}></input>
-                    <label>power ({pow.toFixed(2)}):</label>
-                    <input type='range' min='1' max='1000' value={pow * 100} onChange={(e) => this.updateInput('pow', e.target.value / 100)}></input>
+                    <div>
+                        <label>Oct 1 ({oct1.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct1 * 100} onChange={(e) => this.updateInput('oct1', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Oct 2 ({oct2.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct2 * 100} onChange={(e) => this.updateInput('oct2', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Oct 3 ({oct3.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct3 * 100} onChange={(e) => this.updateInput('oct3', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Oct 4 ({oct4.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct4 * 100} onChange={(e) => this.updateInput('oct4', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Oct 5 ({oct5.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct5 * 100} onChange={(e) => this.updateInput('oct5', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Oct 6 ({oct6.toFixed(2)}):</label>
+                        <input type='range' min='0' max='100' value={oct6 * 100} onChange={(e) => this.updateInput('oct6', e.target.value / 100)}></input>
+                    </div>
+                    <div>
+                        <label>Power ({pow.toFixed(2)}):</label>
+                        <input type='range' min='1' max='1000' value={pow * 100} onChange={(e) => this.updateInput('pow', e.target.value / 100)}></input>
+                    </div>
                 </div>
                 <div id='sim-btn-container'>
+                    <div id='direction-btn-container'>
+                        <button id='north' className={`dir-btn${this.state.horizonDirection === `north` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'north')}>N</button>
+                        <button id='east' className={`dir-btn${this.state.horizonDirection === `east` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'east')}>E</button>
+                        <button id='south' className={`dir-btn${this.state.horizonDirection === `south` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'south')}>S</button>
+                        <button id='west' className={`dir-btn${this.state.horizonDirection === `west` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'west')}>W</button>
+                        {this.renderArrow()}
+                    </div>
                     <button id='alpha-btn' className='sim-btn' onClick={() => this.toggleInput('horizonAlpha')}>Horizon Alpha</button>
                     <button id='topo-btn' className='sim-btn' onClick={() => this.toggleInput('showNoise')}>Bird's Eye Noise</button>
                     <button id='regen-btn' className='sim-btn' onClick={this.updateSeed}>Regenerate</button>
-                </div>
-                <div id='direction-btn-container'>
-                    <button id='north' className={`dir-btn${this.state.horizonDirection === `north` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'north')}>N</button>
-                    <button id='east' className={`dir-btn${this.state.horizonDirection === `east` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'east')}>E</button>
-                    <button id='south' className={`dir-btn${this.state.horizonDirection === `south` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'south')}>S</button>
-                    <button id='west' className={`dir-btn${this.state.horizonDirection === `west` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'west')}>W</button>
-                    {this.renderArrow()}
                 </div>
                 <div id='sim-container'>
                     <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} />

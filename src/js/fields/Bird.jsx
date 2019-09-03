@@ -17,8 +17,8 @@ class Bird extends Component {
                 {grid.map((col, cIndex) => (
                     <React.Fragment key={`Column: ${cIndex}`} >
                         {col.map((value, rIndex) => {
-                            value = Math.round(value * 10);
-                            let hex = 10 + value * 25;
+                            value = Math.round(value * 15);
+                            let hex = 5 + value * 16.7;
                             return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height='10' width='10' fill={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} />);
                         })}
                     </React.Fragment>

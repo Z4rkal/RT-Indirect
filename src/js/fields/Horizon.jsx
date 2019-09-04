@@ -59,8 +59,8 @@ class Horizon extends Component {
                     for (let x = 0; x < width; x++) {
                         sum = 0;
                         count = 0;
-                        for (let i = 0; i < spacing && i + y < height; i++) {
-                            sum += grid[y + i][x];
+                        for (let i = 0; i < spacing && y - i >= 0; i++) {
+                            sum += grid[y - i][x];
                             count++;
                         }
                         lines[n][width - 1 - x] = sum / count;
@@ -97,15 +97,15 @@ class Horizon extends Component {
                     break;
                 case 'east':
                     x = Math.floor(start[1] / this.props.scale);
-                    y = Math.floor((WIDTH - start[0]) / (this.props.scale * spacing) + 1);
+                    y = Math.floor((WIDTH - start[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    x = Math.floor((WIDTH - start[0]) / this.props.scale);
+                    x = Math.floor((WIDTH - start[0]) / this.props.scale - 1);
                     y = Math.floor((HEIGHT - start[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
-                    x = Math.floor((HEIGHT - start[1]) / this.props.scale - 1);
-                    y = Math.floor(start[0] / (this.props.scale * spacing));
+                    x = Math.floor((HEIGHT - start[1]) / this.props.scale);
+                    y = Math.floor(start[0] / (this.props.scale * spacing) + 1);
                     break;
             }
 

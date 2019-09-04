@@ -1,11 +1,11 @@
+import Alea from 'alea';
 import React, { Component } from 'react';
 import SimplexNoise from 'simplex-noise';
-import Alea from 'alea';
-
 import Bird from '../fields/Bird';
 import Horizon from '../fields/Horizon';
-
 import buildGrid from '../lib/buildGrid';
+
+
 
 const SIZE = 100;
 
@@ -38,6 +38,8 @@ class Sim extends Component {
         this.renderArrow = this.renderArrow.bind(this);
         this.selectPosition = this.selectPosition.bind(this);
         this.clearMarkers = this.clearMarkers.bind(this);
+        this.canFire = this.canFire.bind(this);
+        this.fireMortar = this.fireMortar.bind(this);
     }
 
     componentDidMount() {
@@ -166,6 +168,46 @@ class Sim extends Component {
         });
     }
 
+    canFire() {
+        const { start, end } = this.state;
+        if (typeof start !== 'object' || start[0] < 0 || start[1] < 0
+            || typeof end !== 'object' || end[0] < 0 || end[1] < 0)
+            return true;
+
+        return false;
+    }
+
+    fireMortar(start, end) {
+        const random = new Alea();
+        const x1 = start[0];
+        const y1 = start[1];
+        const x2 = end[0];
+        const y2 = end[1];
+
+        const xDist = x2 - x1;
+        const yDist = y2 - y1;
+        const dist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+
+        const toHit = 0.40;
+        const maxError = Math.min(Math.max(dist / 690 * 240, 20), dist / 2);
+
+        const roll = random();
+
+        let blam = [-1, -1];
+        if (roll >= toHit) {
+            blam = [x2, y2];
+            alert(`Hit: ${blam}`);
+        }
+        else if (roll < toHit) {
+            let error = maxError * (1 - (roll / toHit));
+            let ø = 360 * random();
+
+            blam = [x2 + Math.cos(ø) * error, y2 + Math.sin(ø) * error];
+
+            alert(`Miss: ${blam}`);
+        }
+    }
+
     render() {
         const { oct1, oct2, oct3, oct4, oct5, oct6, pow } = this.state;
 
@@ -209,6 +251,8 @@ class Sim extends Component {
                             <button id='start-point-btn' className={`marker-btn${this.state.markerSelect === 'start' ? ` current-marker` : ``}`} onClick={() => this.toggleInput('markerSelect', 'start')}>Start</button>
                             <button id='end-point-btn' className={`marker-btn${this.state.markerSelect === 'end' ? ` current-marker` : ``}`} onClick={() => this.toggleInput('markerSelect', 'end')}>End</button>
                             <button id='clear-point-btn' className='marker-btn' onClick={() => this.clearMarkers()}>Clear</button>
+                            <hr />
+                            <button id='fire-btn' className={`marker-btn`} disabled={this.canFire()} onClick={() => this.fireMortar(this.state.start, this.state.end)}>Fire</button>
                         </div>
                     </div>
                 </div>
@@ -246,7 +290,7 @@ Mortar has 24 shots per ton, assume ammo bin weighs the last two kg of each shel
 Max range according to RT is 690m, and we're assuming that the shell just collides with the target, nothing fancy like airbursts
 
     - angle would be 45° for max range
-    - ignoring air resistance 
+    - ignoring air resistance
     - assuming every planet has earth's gravity for simplicity
 
     Launch a 35kg shell 690m at 45°
@@ -294,7 +338,7 @@ Max range according to RT is 690m, and we're assuming that the shell just collid
 
     t₁ = v * sin(ø) / g
     h₁ = v * sin(ø) * t₁  - 1/2 * g * t₁² = (v * sin(ø))² / g - 1/2 * g * (v * sin(ø) / g)² = (v * sin(ø))² / g - (v * sin(ø))² / 2g;
-    h₁= (v * sin(ø))² / 2g;
+    h₁ = (v * sin(ø))² / 2g;
     Max height at 90° = (82.28m/s * sin(90°)² / (2 * 9.8m/s²);
     Max height at 90° = ~345.41m
 
@@ -308,7 +352,15 @@ Max range according to RT is 690m, and we're assuming that the shell just collid
         -It leaves the barrel at ~82.28m/s, with a horizontal component of ~58.18m/s
         -It has 118474.97J of kinetic energy as it leaves the barrel and when it hits a target at the same elevation
 
-We'll assume that each pixel is one meter, as that ends up being about 175% the size of our canvas for max range;
+        -The shell can be aimed anywhere between 0m and 690m by adjusting the vertical angle;
+        -At 90°, the maximum height is 345.41m, while at 45° the maximum height is 172.70m;
+
+        -We'll assume that 45° is the minimum firing angle, and 90° the maximum
+        -In game mortars can direct fire, but we'll just pretend that it's always indirect, since
+        to maintain the same range stats with direct fire they'd need to suddenly fire the shell with much more force;
+
+We'll assume that each pixel is one meter, as that ends up being about 175% the size of our canvas for max horizontal range,
+and it means that our max vertical range will fit nicely inside of our horizontal canvas most of the time;
 
         General Procedure Plan
 Calculate angle, power, etc to target

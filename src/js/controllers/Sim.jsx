@@ -39,9 +39,7 @@ class Sim extends Component {
         this.selectPosition = this.selectPosition.bind(this);
         this.clearMarkers = this.clearMarkers.bind(this);
     }
-    //TODO: pass noise parameters into buildGrid and have them be user input,
-    //Keep the same seed until regen is hit
-    //Move on to implementing the actual intent of the project
+
     componentDidMount() {
         const random = new Alea()();
         const simplex = new SimplexNoise(random);
@@ -237,8 +235,85 @@ class Sim extends Component {
 
 export default Sim;
 
-//Calculate angle, power, etc to target
-//Roll to-hit
-//Calculate error radius
-//Randomly select point on error circle
-//Adjust parameters to hit point
+
+/* Calc Notes
+        Shell Math
+1 grid node === ? meters
+
+1 ton === 907.185kg
+Mortar has 24 shots per ton, assume ammo bin weighs the last two kg of each shell.
+907.185kg / 24 shots = 37.8kg -> assume 35kg per shot, which is HUGE compared to real life mortars, but this is a shell for a 'mech
+Max range according to RT is 690m, and we're assuming that the shell just collides with the target, nothing fancy like airbursts
+
+    - angle would be 45° for max range
+    - ignoring air resistance 
+    - assuming every planet has earth's gravity for simplicity
+
+    Launch a 35kg shell 690m at 45°
+
+    m = 35kg;
+    v = necessary velocity;
+    t = time;
+    ø = 45°;
+
+    cos(ø)vt = 690m;
+    sin(ø)vt - 1/2 * 9.8m/s²t² = 0m;
+
+    vt = 690m/cos(ø);
+
+    2sin(ø)690m/cos(ø) = 9.8m/s²t²;
+    √(2sin(ø)690s²/(cos(ø)9.8)) = t;
+    t = ~11.86s;
+
+    v = 690m/(cos(ø)11.86s);
+    v = ~82.28m/s;
+    horizontal v = v * cos(ø) = ~58.18m/s;
+    vertical v = v * sin(ø) = ~58.18m/s;
+
+    Kinetic Energy (K) = 0.5mv²
+
+    K = 0.5(35kg)(82.28m/s)² = ~118474.97J
+
+    Kinetic Energy at the end of its flight if the target is the ground:
+    vᵧ₂ = 82.28m/s * sin(ø) - 9.8m/s²*11.86s;
+    vᵧ₂ = ~58.05m/s downward, which is close enough to the initial vertical v of 58.18m/s that we can say:
+    Assuming the target is 0m in height compared to the start point, the shell hits the target with ~118474.97J
+    Of course, if we factored in air resistance this would be different
+
+    So the shell has to leave the barrel with about 118475 Joules in order to travel 690m;
+
+    The maximum height it achieves in that time is at the point when the vertical velocity is 0m/s:
+    0m/s = 82.28m/s * sin(ø) - 9.8m/s²*t₁;
+    t₁ = 82.28m/s * sin(ø) / 9.8m/s²;
+    t₁ = ~5.94s;
+
+    82.28m/s * sin(ø) * 5.94s - 1/2 * 9.8m/s² * 5.94s² = h₁;
+    h₁ = ~172.70m;
+
+    The maximum height is only 172.70m, so at max range the shell can't actually clear much if we were being realistic.
+
+    t₁ = v * sin(ø) / g
+    h₁ = v * sin(ø) * t₁  - 1/2 * g * t₁² = (v * sin(ø))² / g - 1/2 * g * (v * sin(ø) / g)² = (v * sin(ø))² / g - (v * sin(ø))² / 2g;
+    h₁= (v * sin(ø))² / 2g;
+    Max height at 90° = (82.28m/s * sin(90°)² / (2 * 9.8m/s²);
+    Max height at 90° = ~345.41m
+
+    So the shell can clear between 345.41m and 172.70m of vertical obstructions at the height of its arc depending on the shot angle
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Recap:
+        -At 45°, with no air resistance and earth gravity
+        -The shell can travel 690m
+        -It leaves the barrel at ~82.28m/s, with a horizontal component of ~58.18m/s
+        -It has 118474.97J of kinetic energy as it leaves the barrel and when it hits a target at the same elevation
+
+We'll assume that each pixel is one meter, as that ends up being about 175% the size of our canvas for max range;
+
+        General Procedure Plan
+Calculate angle, power, etc to target
+Roll to-hit
+Calculate error radius
+Randomly select point on error circle
+Adjust parameters to hit point
+*/

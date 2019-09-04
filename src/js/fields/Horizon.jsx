@@ -10,7 +10,7 @@ class Horizon extends Component {
         this.buildHorizonView = this.buildHorizonView.bind(this);
     }
 
-    buildHorizonView(grid, alpha, direction, start) {
+    buildHorizonView(grid, alpha, direction, start, end) {
         const spacing = grid.length / 50;
         const height = grid.length, width = grid.length;
 
@@ -114,10 +114,46 @@ class Horizon extends Component {
                 let rectY = 400 - (lines[y][x] * 400);
                 startLine = y;
 
-                startProp = (<rect x={rectX} y={rectY - 40} height='40' width='3' fill='#f7c9d9' />);
+                startProp = (<rect x={rectX} y={rectY - 40} height='40' width='3' fill={start[2] || '#f7c9d9'} />);
             }
             else console.log(y);
         }
+
+        x = -1;
+        y = -1;
+        let endProp = false;
+        let endLine = false;
+        if (lines && typeof end === 'object' && end[0] >= 0 && end[1] >= 0) {
+            switch (direction) {
+                default:
+                case 'north':
+                    x = Math.floor(end[0] / this.props.scale);
+                    y = Math.floor(end[1] / (this.props.scale * spacing));
+                    break;
+                case 'east':
+                    x = Math.floor(end[1] / this.props.scale);
+                    y = Math.floor((WIDTH - end[0]) / (this.props.scale * spacing));
+                    break;
+                case 'south':
+                    x = Math.floor((WIDTH - end[0]) / this.props.scale - 1);
+                    y = Math.floor((HEIGHT - end[1]) / (this.props.scale * spacing));
+                    break;
+                case 'west':
+                    x = Math.floor((HEIGHT - end[1]) / this.props.scale);
+                    y = Math.floor(end[0] / (this.props.scale * spacing) + 1);
+                    break;
+            }
+
+            if (lines[y]) {
+                let rectX = x * this.props.scale + this.props.scale;
+                let rectY = 400 - (lines[y][x] * 400);
+                endLine = y;
+
+                endProp = (<rect x={rectX} y={rectY - 40} height='40' width='3' fill={end[2] || '#a700a7'} />);
+            }
+            else console.log(y);
+        }
+
 
         return (
             <>
@@ -127,6 +163,7 @@ class Horizon extends Component {
                         return (
                             <React.Fragment key={`line ${cIndex}`}>
                                 {startProp && startLine === cIndex ? startProp : null}
+                                {endProp && endLine === cIndex ? endProp : null}
                                 <path d={`M 0 400 L 0 ${400 - (col[0] * 400)} ${col.reduce((prev, value, rIndex) => {
                                     value = 400 - (value * 400)
                                     return prev + (` L ${rIndex * this.props.scale + this.props.scale} ${value}`)
@@ -139,14 +176,14 @@ class Horizon extends Component {
     }
 
     render() {
-        const { start, grid, alpha, direction } = this.props;
+        const { start, end, grid, alpha, direction } = this.props;
 
         return (
             <div id='horizon-container'>
                 <label id='horizon-label' htmlFor='horizon-svg'>Horizon View</label>
                 <svg id='horizon-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`}>
                     <rect x='0' y='0' height={HEIGHT} width={WIDTH} fill='#ffffff' />
-                    {this.buildHorizonView(grid, alpha, direction, start)}
+                    {this.buildHorizonView(grid, alpha, direction, start, end)}
                 </svg>
             </div>
         );

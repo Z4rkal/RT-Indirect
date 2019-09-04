@@ -67,16 +67,18 @@
   justify-content: space-around;
 }
 
-.sim-btn {
-    padding: 10px;
-    min-width: 25%;
-    
-    font-size: 2rem;
+.sim-btn,
+.marker-btn {
+  padding: 0px 5px;
+  max-height: 4rem;
 
-    border: 2px solid #333333;
-    border-radius: 3px;
-    
-    margin: 2rem auto;
+  font-size: 2rem;
+
+  border: 2px solid #333333;
+  border-radius: 3px;
+
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 #direction-btn-container {
@@ -87,11 +89,10 @@
 }
 
 .dir-btn {
-    font-size: 1.4rem;
-    border: none;
+  font-size: 1.4rem;
+  border: none;
 
-    position: absolute;
-
+  position: absolute;
 }
 
 .dir-btn:focus {
@@ -128,6 +129,26 @@
   z-index: 9;
 }
 
-.current-dir {
+.current-dir,
+.current-marker,
+.highlight {
   color: #f73979;
+}
+
+.flex-container {
+  display: flex;
+}
+
+#noise-options-container {
+  flex-shrink: 0;
+}
+
+#calc-options-container {
+  display: flex;
+  justify-content: center;
+
+  > button {
+    margin-right: 5px;
+    margin-left: 5px;
+  }
 }

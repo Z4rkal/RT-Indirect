@@ -43,9 +43,9 @@ class Bird extends Component {
         )
     }
 
-    renderX(start) {
-        const x = start[0];
-        const y = start[1];
+    renderX(point) {
+        const x = point[0];
+        const y = point[1];
         const halfLength = 10;
 
         let path = `M ${x} ${y}`;
@@ -58,19 +58,20 @@ class Bird extends Component {
         path += ` L ${Math.min(Math.max(x - halfLength, 0), WIDTH)} ${Math.min(Math.max(y - halfLength, 0), HEIGHT)}`;
 
         return (
-            <path d={path} stroke='#f73979' strokeWidth='2' strokeLinecap='round' fill='transparent' />
+            <path d={path} stroke={point[2] || '#f7c8d8'} strokeWidth='2' strokeLinecap='round' fill='transparent' />
         )
     }
 
     render() {
-        const { start, grid, showNoise, selectPosition } = this.props;
+        const { start, end, grid, showNoise, selectPosition, marker } = this.props;
 
         return (
             <div id='bird-container'>
                 <label id='bird-label' htmlFor='bird-svg'>Bird's Eye View</label>
-                <svg id='bird-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`} onClick={(e) => { e.persist(); selectPosition(e); }}>
+                <svg id='bird-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`} onClick={(e) => { e.persist(); selectPosition(marker,e); }}>
                     {showNoise ? this.renderNoise(grid) : this.renderTopography(grid)}
                     {typeof start === 'object' && start[0] >= 0 && start[1] >= 0 ? this.renderX(start) : null}
+                    {typeof end === 'object' && end[0] >= 0 && end[1] >= 0 ? this.renderX(end) : null}
                 </svg>
             </div>
         );

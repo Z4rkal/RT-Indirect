@@ -18,16 +18,18 @@ class Sim extends Component {
             showNoise: false,
             horizonAlpha: false,
             horizonDirection: 'north',
+            markerSelect: false,
             noiseSeed: undefined,
             simplex: undefined,
+            start: [-1, -1, '#f73979'],
+            end: [-1, -1, '#a700a7'],
             oct1: 0.80,
             oct2: 0.45,
             oct3: 0.14,
             oct4: 0.07,
             oct5: 0.03,
             oct6: 0.01,
-            pow: 4.7,
-            start: [-1, -1]
+            pow: 4.7
         }
 
         this.toggleInput = this.toggleInput.bind(this);
@@ -35,6 +37,7 @@ class Sim extends Component {
         this.updateGrid = this.updateGrid.bind(this);
         this.renderArrow = this.renderArrow.bind(this);
         this.selectPosition = this.selectPosition.bind(this);
+        this.clearMarkers = this.clearMarkers.bind(this);
     }
     //TODO: pass noise parameters into buildGrid and have them be user input,
     //Keep the same seed until regen is hit
@@ -77,7 +80,19 @@ class Sim extends Component {
     toggleInput(field, value) {
         if (this.state[field] === undefined) throw new Error(`Invalid field passed into toggleInput in Sim.jsx`);
 
-        if (field !== 'horizonDirection') {
+        if (field === 'markerSelect') {
+            if (this.state[field] === value) {
+                this.setState({
+                    [field]: false
+                });
+            }
+            else {
+                this.setState({
+                    [field]: value
+                });
+            }
+        }
+        else if (field !== 'horizonDirection') {
             this.setState({
                 [field]: !this.state[field]
             });
@@ -133,15 +148,24 @@ class Sim extends Component {
         )
     }
 
-    selectPosition(event) {
+    selectPosition(marker, event) {
+        if (marker === false) return;
+        if (marker !== 'start' && marker !== 'end') throw new Error(`Invalid marker passed into selectPosition in Sim.jsx`);
         if (event.nativeEvent) {
-            const x = Math.min(Math.max(event.nativeEvent.offsetX,0),400);
-            const y = Math.min(Math.max(event.nativeEvent.offsetY,0),400);
+            const x = Math.min(Math.max(event.nativeEvent.offsetX, 0), 400);
+            const y = Math.min(Math.max(event.nativeEvent.offsetY, 0), 400);
 
             this.setState({
-                start: [x, y]
+                [marker]: [x, y, this.state[marker][2]]
             });
         }
+    }
+
+    clearMarkers() {
+        this.setState({
+            start: [-1, -1, '#f73979'],
+            end: [-1, -1, '#a700a7'],
+        });
     }
 
     render() {
@@ -149,35 +173,45 @@ class Sim extends Component {
 
         return (
             <>
-                <div id='noise-options-container'>
-                    <p id='noise-desc'>Noise Map Parameters:</p>
-                    <div>
-                        <label>Oct 1 ({oct1.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct1 * 100} onChange={(e) => this.updateInput('oct1', e.target.value / 100)}></input>
+                <div className='flex-container'>
+                    <div id='noise-options-container'>
+                        <p id='noise-desc'>Noise Map Parameters:</p>
+                        <div>
+                            <label>Oct 1 ({oct1.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct1 * 100} onChange={(e) => this.updateInput('oct1', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Oct 2 ({oct2.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct2 * 100} onChange={(e) => this.updateInput('oct2', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Oct 3 ({oct3.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct3 * 100} onChange={(e) => this.updateInput('oct3', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Oct 4 ({oct4.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct4 * 100} onChange={(e) => this.updateInput('oct4', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Oct 5 ({oct5.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct5 * 100} onChange={(e) => this.updateInput('oct5', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Oct 6 ({oct6.toFixed(2)}):</label>
+                            <input type='range' min='0' max='100' value={oct6 * 100} onChange={(e) => this.updateInput('oct6', e.target.value / 100)}></input>
+                        </div>
+                        <div>
+                            <label>Power ({pow.toFixed(2)}):</label>
+                            <input type='range' min='1' max='1000' value={pow * 100} onChange={(e) => this.updateInput('pow', e.target.value / 100)}></input>
+                        </div>
                     </div>
-                    <div>
-                        <label>Oct 2 ({oct2.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct2 * 100} onChange={(e) => this.updateInput('oct2', e.target.value / 100)}></input>
-                    </div>
-                    <div>
-                        <label>Oct 3 ({oct3.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct3 * 100} onChange={(e) => this.updateInput('oct3', e.target.value / 100)}></input>
-                    </div>
-                    <div>
-                        <label>Oct 4 ({oct4.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct4 * 100} onChange={(e) => this.updateInput('oct4', e.target.value / 100)}></input>
-                    </div>
-                    <div>
-                        <label>Oct 5 ({oct5.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct5 * 100} onChange={(e) => this.updateInput('oct5', e.target.value / 100)}></input>
-                    </div>
-                    <div>
-                        <label>Oct 6 ({oct6.toFixed(2)}):</label>
-                        <input type='range' min='0' max='100' value={oct6 * 100} onChange={(e) => this.updateInput('oct6', e.target.value / 100)}></input>
-                    </div>
-                    <div>
-                        <label>Power ({pow.toFixed(2)}):</label>
-                        <input type='range' min='1' max='1000' value={pow * 100} onChange={(e) => this.updateInput('pow', e.target.value / 100)}></input>
+                    <div id='calc-container'>
+                        <p id='calc-desc'>Use these buttons to interact with the environment, click on the bird's eye view to place the currently selected marker.</p>
+                        <div id='calc-options-container'>
+                            <button id='start-point-btn' className={`marker-btn${this.state.markerSelect === 'start' ? ` current-marker` : ``}`} onClick={() => this.toggleInput('markerSelect', 'start')}>Start</button>
+                            <button id='end-point-btn' className={`marker-btn${this.state.markerSelect === 'end' ? ` current-marker` : ``}`} onClick={() => this.toggleInput('markerSelect', 'end')}>End</button>
+                            <button id='clear-point-btn' className='marker-btn' onClick={() => this.clearMarkers()}>Clear</button>
+                        </div>
                     </div>
                 </div>
                 <div id='sim-btn-container'>
@@ -188,13 +222,13 @@ class Sim extends Component {
                         <button id='west' className={`dir-btn${this.state.horizonDirection === `west` ? ` current-dir` : ``}`} onClick={() => this.toggleInput('horizonDirection', 'west')}>W</button>
                         {this.renderArrow()}
                     </div>
-                    <button id='alpha-btn' className='sim-btn' onClick={() => this.toggleInput('horizonAlpha')}>Horizon Alpha</button>
-                    <button id='topo-btn' className='sim-btn' onClick={() => this.toggleInput('showNoise')}>Bird's Eye Noise</button>
+                    <button id='alpha-btn' className={`sim-btn${this.state.horizonAlpha ? ` highlight` : ``}`} onClick={() => this.toggleInput('horizonAlpha')}>Horizon Alpha</button>
+                    <button id='topo-btn' className={`sim-btn${this.state.showNoise ? ` highlight` : ``}`} onClick={() => this.toggleInput('showNoise')}>Bird's Eye Noise</button>
                     <button id='regen-btn' className='sim-btn' onClick={this.updateSeed}>Regenerate</button>
                 </div>
                 <div id='sim-container'>
-                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} start={this.state.start} />
-                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} start={this.state.start} selectPosition={this.selectPosition} />
+                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} start={this.state.start} end={this.state.end} />
+                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} start={this.state.start} end={this.state.end} selectPosition={this.selectPosition} marker={this.state.markerSelect} />
                 </div>
             </>
         );
@@ -202,3 +236,9 @@ class Sim extends Component {
 }
 
 export default Sim;
+
+//Calculate angle, power, etc to target
+//Roll to-hit
+//Calculate error radius
+//Randomly select point on error circle
+//Adjust parameters to hit point

@@ -23,6 +23,7 @@ class Sim extends Component {
             simplex: undefined,
             start: [-1, -1, '#f73979'],
             end: [-1, -1, '#a700a7'],
+            blam: [false, false],
             oct1: 0.80,
             oct2: 0.45,
             oct3: 0.14,
@@ -165,6 +166,7 @@ class Sim extends Component {
         this.setState({
             start: [-1, -1, '#f73979'],
             end: [-1, -1, '#a700a7'],
+            blam: [false, false]
         });
     }
 
@@ -188,7 +190,7 @@ class Sim extends Component {
         const yDist = y2 - y1;
         const dist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
 
-        const toHit = 0.40;
+        const toHit = 0.85;
         const maxError = Math.min(Math.max(dist / 690 * 240, 20), dist / 2);
 
         const roll = random();
@@ -196,7 +198,12 @@ class Sim extends Component {
         let blam = [-1, -1];
         if (roll >= toHit) {
             blam = [x2, y2];
-            alert(`Hit: ${blam}`);
+
+            //alert(`Hit: ${blam}`);
+
+            this.setState({
+                blam: blam
+            });
         }
         else if (roll < toHit) {
             let error = maxError * (1 - (roll / toHit));
@@ -204,7 +211,11 @@ class Sim extends Component {
 
             blam = [x2 + Math.cos(ø) * error, y2 + Math.sin(ø) * error];
 
-            alert(`Miss: ${blam}`);
+            //alert(`Miss: ${blam}`);
+
+            this.setState({
+                blam: blam
+            });
         }
     }
 
@@ -269,8 +280,8 @@ class Sim extends Component {
                     <button id='regen-btn' className='sim-btn' onClick={this.updateSeed}>Regenerate</button>
                 </div>
                 <div id='sim-container'>
-                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} start={this.state.start} end={this.state.end} />
-                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} start={this.state.start} end={this.state.end} selectPosition={this.selectPosition} marker={this.state.markerSelect} />
+                    <Horizon grid={this.state.grid} scale={400 / SIZE} alpha={this.state.horizonAlpha} direction={this.state.horizonDirection} start={this.state.start} end={this.state.end} blam={this.state.blam} />
+                    <Bird grid={this.state.grid} scale={400 / SIZE} showNoise={this.state.showNoise} start={this.state.start} end={this.state.end} blam={this.state.blam} selectPosition={this.selectPosition} marker={this.state.markerSelect} />
                 </div>
             </>
         );

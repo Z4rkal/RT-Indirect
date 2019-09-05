@@ -185,8 +185,8 @@ class Horizon extends Component {
 
         let destX = -1;
         let destY = -1;
-        let shotLine = false;
-        let shot = null;
+        let points;
+        let shot = false;
         if (typeof blam === 'object' && typeof blam[0] === 'number' && typeof blam[1] === 'number') {
             switch (direction) {
                 default:
@@ -224,23 +224,24 @@ class Horizon extends Component {
                 ΔZ = (400 - (lines[startY][startX] * 400)) - (400 - (lines[destY][destX] * 400));
             }
 
-            shotLine = 9;
-
             let dist = Math.sqrt(Math.pow((destX - startX) * this.props.scale, 2) + Math.pow((destY - startY) * this.props.scale * spacing, 2));
 
-            console.log(`ΔX: ${ΔX}, ΔY: ${ΔY}, ΔZ: ${ΔZ}`);
+            //console.log(`ΔX: ${ΔX}, ΔY: ${ΔY}, ΔZ: ${ΔZ}`);
             let øZ = Math.atan((Math.pow(VELOCITY, 2) + Math.sqrt(Math.pow(VELOCITY, 4) - 9.8 * (9.8 * Math.pow(dist, 2) + 2 * ΔZ * Math.pow(VELOCITY, 2)))) / (9.8 * dist));
-            console.log(`Dist: ${dist}, øZ: ${180 / Math.PI * øZ}`);
+            //console.log(`Dist: ${dist}, øZ: ${180 / Math.PI * øZ}`);
 
             let øXY = Math.atan2(ΔY, ΔX); //(Math.PI * direction) / 180 + 
-            console.log(`øXY: ${180 / Math.PI * øXY}`);
+            //console.log(`øXY: ${180 / Math.PI * øXY}`);
 
             let t = dist / (VELOCITY * Math.cos(øZ));
 
             let cX = Math.cos(øXY);
-            console.log(cX);
+            //console.log(cX);
 
-            let points = new Array(Math.ceil(t * 10));
+            let cY = Math.sin(øXY);
+            //console.log(cY);
+
+            points = new Array(Math.ceil(t * 10));
             points = points.fill(1, 0, points.length);
 
             let prevPoint = [startX * this.props.scale + this.props.scale, 400 - (lines[startY][startX] * 400)];
@@ -251,26 +252,30 @@ class Horizon extends Component {
                     let zt = 400 - (lines[startY][startX] * 400) - (VELOCITY * ((pIndex + 1) / 10) * Math.sin(øZ) - 1 / 2 * 9.8 * Math.pow((pIndex + 1) / 10, 2));
                     d += ` L ${xt} ${zt}`;
                     prevPoint = [xt, zt];
-                    return (d);
+                    let zIndex = Math.max(Math.min(Math.floor(startY - (VELOCITY * ((pIndex + 1) / 10) * cY * Math.cos(øZ) / (this.props.scale * spacing))), lines.length - 1), 0);
+                    return [d, zIndex];
                 }
                 else {
-                    console.log(`last natural Z: ${prevPoint[1]}, target Z: ${finalZ}`);
+                    //console.log(`last natural Z: ${prevPoint[1]}, target Z: ${finalZ}`);
                     let d = `M ${prevPoint[0]} ${prevPoint[1]}`;
                     let xt = destX * this.props.scale + this.props.scale;
                     let zt = finalZ;
                     d += ` L ${xt} ${zt}`;
                     prevPoint = [xt, zt];
-                    return (d);
+                    let zIndex = Math.max(Math.min(Math.floor(startY - (VELOCITY * ((pIndex + 1) / 10) * cY * Math.cos(øZ) / (this.props.scale * spacing))), lines.length - 1), 0);
+                    return [d, zIndex];
                 }
             });
 
-            shot = (
-                <>
-                    {points.map((point, pIndex) => (
-                        <path key={pIndex} d={point} stroke='#f7c8d8' fill='transparent' />
-                    ))}
-                </>
-            );
+            shot = true;
+            
+            // = (
+            //     <>
+            //         {points.map((point, pIndex) => (
+            //             <path key={pIndex} d={point[0]} stroke='#f7c8d8' fill='transparent' />
+            //         ))}
+            //     </>
+            // );
         }
 
 
@@ -284,7 +289,9 @@ class Horizon extends Component {
                             <React.Fragment key={`line ${cIndex}`}>
                                 {startProp && startLine === cIndex ? startProp : null}
                                 {endProp && endLine === cIndex ? endProp : null}
-
+                                {shot ? points.filter((point) => point[1] === cIndex).map((point,pIndex) => (
+                                    <path key={pIndex} d={point[0]} stroke='#f7c8d8' fill='transparent' />
+                                )) : null}
                                 <path d={`M 0 400 L 0 ${400 - (col[0] * 400)} ${col.reduce((prev, value, rIndex) => {
                                     value = 400 - (value * 400)
                                     return prev + (` L ${rIndex * this.props.scale + this.props.scale} ${value}`)
@@ -292,7 +299,7 @@ class Horizon extends Component {
                             </React.Fragment>);
                     })
                 }
-                {shot}
+                {null}
             </>
         )
     }
@@ -359,10 +366,4 @@ export default Horizon;
     so:
 
     ø = atan(v₀² + √(v₀⁴ - g(gd² + 2h₂v₀²))) / gd
-
-    ////////
-
-    v₀sin(ø)t - 1/2 * gt² = h₂
-
-
 */

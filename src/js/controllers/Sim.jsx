@@ -199,8 +199,6 @@ class Sim extends Component {
         if (roll >= toHit) {
             blam = [x2, y2];
 
-            //alert(`Hit: ${blam}`);
-
             this.setState({
                 blam: blam
             });
@@ -213,18 +211,15 @@ class Sim extends Component {
             let bY = y2 + Math.sin(ø) * error;
 
             let trajDist = Math.sqrt(Math.pow(bX - x1, 2) + Math.pow(bY - y1, 2));
-            console.log(trajDist);
             if (trajDist > 690) {
                 let adjustedDist = 690 - (trajDist - 690);
                 let ratio = adjustedDist / trajDist;
-                //Need to fix this, the math is wrong
-                bX = bX * ratio;
-                bY = bY * ratio;
+
+                bX = -(x1 - bX) * ratio + x1;
+                bY = -(y1 - bY) * ratio + y1;
             }
 
             blam = [bX, bY];
-
-            //alert(`Miss: ${blam}`);
 
             this.setState({
                 blam: blam

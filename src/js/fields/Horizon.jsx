@@ -13,6 +13,8 @@ class Horizon extends Component {
         this.buildHorizonView = this.buildHorizonView.bind(this);
     }
 
+    //TODO: Split this into multiple functions so that the various bits of jsx can get stored in the state
+    //And we can update pieces individually
     buildHorizonView(grid, alpha, direction, start, end, blam) {
         const spacing = grid.length / 50;
         const height = grid.length, width = grid.length;
@@ -41,7 +43,7 @@ class Horizon extends Component {
                 }
                 break;
             case 'east':
-                n = Math.floor(height / spacing);
+                n = Math.floor(height / spacing) - 1;
                 for (let x = 0; x < width; x += spacing) {
                     lines[n] = [];
                     for (let y = height - 1; y >= 0; y--) {
@@ -116,12 +118,12 @@ class Horizon extends Component {
                 startY = lines.length - 1;
             }
 
-            if (startX >= lines[startY].length) {
-                startX = lines[startY].length - 1;
+            if (startX >= (lines[startY]).length) {
+                startX = (lines[startY]).length - 1;
             }
 
             if (lines[startY]) {
-                let rectX = startX * this.props.scale + this.props.scale;
+                let rectX = startX * this.props.scale;
                 let rectY = 400 - (lines[startY][startX] * 400);
                 startLine = startY;
 
@@ -159,12 +161,20 @@ class Horizon extends Component {
                 endY = lines.length - 1;
             }
 
-            if (endX >= lines[endY].length) {
-                endX = lines[endY].length - 1;
+            // if(endY < 0) {
+            //     endY = 0;
+            // }
+
+            if (endX >= (lines[endY]).length) {
+                endX = (lines[endY]).length - 1;
             }
 
+            // if(endX < 0) {
+            //     endX = 0;
+            // }
+
             if (lines[endY]) {
-                let rectX = endX * this.props.scale + this.props.scale;
+                let rectX = endX * this.props.scale;
                 let rectY = 400 - (lines[endY][endX] * 400);
                 endLine = endY;
 
@@ -176,7 +186,7 @@ class Horizon extends Component {
         let destX = -1;
         let destY = -1;
         let shotLine = false;
-        let shot = false;
+        let shot = null;
         if (typeof blam === 'object' && typeof blam[0] === 'number' && typeof blam[1] === 'number') {
             switch (direction) {
                 default:
@@ -200,52 +210,74 @@ class Horizon extends Component {
 
 
 
-            let finalX = destX * this.props.scale + this.props.scale;
-            let finalY;
+            let ΔX = destX * this.props.scale - startX * this.props.scale;
+            let ΔY = -(destY - startY) * this.props.scale * spacing;
+            let ΔZ;
+            let finalZ;
 
-            if (destY >= lines.length || destY < 0 || destX >= lines[destY].length || destX < 0) finalY = 400;
-            else finalY = 400 - (lines[destY][destX] * 400);
+            if (destY >= lines.length || destY < 0 || destX >= lines[destY].length || destX < 0) {
+                finalZ = 400;
+                ΔZ = 400 - (400 - lines[startY][startX] * 400);
+            }
+            else {
+                finalZ = 400 - (lines[destY][destX] * 400);
+                ΔZ = (400 - (lines[startY][startX] * 400)) - (400 - (lines[destY][destX] * 400));
+            }
 
-            shotLine = destY;
+            shotLine = 9;
 
             let dist = Math.sqrt(Math.pow((destX - startX) * this.props.scale, 2) + Math.pow((destY - startY) * this.props.scale * spacing, 2));
 
-            //This equation doesn't date elevation into account so I need to make it more complicated :(
-            let øᵧ = 90 - (180 / Math.PI) * Math.asin(9.8 * dist / Math.pow(VELOCITY, 2)) / 2;
-            console.log(`Dist: ${dist}, Theta: ${øᵧ}`);
+            console.log(`ΔX: ${ΔX}, ΔY: ${ΔY}, ΔZ: ${ΔZ}`);
+            let øZ = Math.atan((Math.pow(VELOCITY, 2) + Math.sqrt(Math.pow(VELOCITY, 4) - 9.8 * (9.8 * Math.pow(dist, 2) + 2 * ΔZ * Math.pow(VELOCITY, 2)))) / (9.8 * dist));
+            console.log(`Dist: ${dist}, øZ: ${180 / Math.PI * øZ}`);
+
+            let øXY = Math.atan2(ΔY, ΔX); //(Math.PI * direction) / 180 + 
+            console.log(`øXY: ${180 / Math.PI * øXY}`);
+
+            let t = dist / (VELOCITY * Math.cos(øZ));
+
+            let cX = Math.cos(øXY);
+            console.log(cX);
+
+            let points = new Array(Math.ceil(t * 10));
+            points = points.fill(1, 0, points.length);
+
+            let prevPoint = [startX * this.props.scale, 400 - (lines[startY][startX] * 400)];
+            points = points.map((point, pIndex) => {
+                if (pIndex !== points.length - 1) {
+                    let d = `M ${prevPoint[0]} ${prevPoint[1]}`;
+                    let xt = prevPoint[0] + (VELOCITY * (0.1) * cX * Math.cos(øZ));
+                    let zt = 400 - (lines[startY][startX] * 400) - (VELOCITY * (pIndex / 10) * Math.sin(øZ) - 1 / 2 * 9.8 * pIndex / 10 * (pIndex / 10));
+                    d += ` L ${xt} ${zt}`;
+                    prevPoint = [xt, zt];
+                    return (d);
+                }
+                else {
+                    console.log(`last natural Z: ${prevPoint[1]}, target Z: ${finalZ}`);
+                    let d = `M ${prevPoint[0]} ${prevPoint[1]}`;
+                    let xt = destX * this.props.scale;
+                    let zt = finalZ;
+                    d += ` L ${xt} ${zt}`;
+                    prevPoint = [xt, zt];
+                    return (d);
+                }
+            });
+
+            shot = (
+                <>
+                    {points.map((point, pIndex) => (
+                        <path key={pIndex} d={point} stroke='#f7c8d8' fill='transparent' />
+                    ))}
+                </>
+            );
+
+            // shot = (
+            //     <path d={`M ${startX * this.props.scale} ${400 - (lines[startY][startX] * 400) - 40} L ${destX * this.props.scale} ${finalZ}`} stroke='#f7c8d8' fill='transparent' />
+            // );
         }
 
-        /*
-            Have:
-                -v = 82.28m/s
-                -d = (dist)m;
-                -g = 9.8m/s²
 
-            Need Theta (ø) and time (t):
-
-            82.28m/s * cos(ø) * t = d
-            t = d / (82.28m/s * cos(ø))
-
-            82.28m/s * sin(ø) * t - 1/2 * 9.8m/s² * t² = 0m
-            t(82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t) = 0m
-
-            t = 0 is solution one, but we don't care about it
-
-            82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t = 0m
-            82.28m/s * sin(ø) = 1/2 * 9.8m/s² * t
-            sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
-            sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
-            sin(ø) = 1/2 * 9.8m/s² * d / ((82.28m/s)² * cos(ø))
-            sin(ø)cos(ø) = 1/2 * 9.8m/s² * d / 6769.9984m²/s²
-
-            sin(ø)cos(ø) = sin(2ø)/2
-
-            sin(2ø) = 9.8m/s² * d / 6769.9984m²/s²
-            2ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²)
-            ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²) / 2
-
-            Formula: ø = 180/π * sin⁻¹(g * d / v²) / 2
-        */
 
         return (
             <>
@@ -256,7 +288,7 @@ class Horizon extends Component {
                             <React.Fragment key={`line ${cIndex}`}>
                                 {startProp && startLine === cIndex ? startProp : null}
                                 {endProp && endLine === cIndex ? endProp : null}
-                                {shot && shotLine === cIndex ? shot : null}
+
                                 <path d={`M 0 400 L 0 ${400 - (col[0] * 400)} ${col.reduce((prev, value, rIndex) => {
                                     value = 400 - (value * 400)
                                     return prev + (` L ${rIndex * this.props.scale + this.props.scale} ${value}`)
@@ -264,6 +296,7 @@ class Horizon extends Component {
                             </React.Fragment>);
                     })
                 }
+                {shot}
             </>
         )
     }
@@ -286,3 +319,54 @@ class Horizon extends Component {
 export default Horizon;
 
 //https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
+
+/*  Math Notes
+    Have:
+        -v = 82.28m/s
+        -d = (dist)m;
+        -g = 9.8m/s²
+
+    Need Theta (ø) and time (t):
+
+    82.28m/s * cos(ø) * t = d
+    t = d / (82.28m/s * cos(ø))
+
+    82.28m/s * sin(ø) * t - 1/2 * 9.8m/s² * t² = 0m
+    t(82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t) = 0m
+
+    t = 0 is solution one, but we don't care about it
+
+    82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t = 0m
+    82.28m/s * sin(ø) = 1/2 * 9.8m/s² * t
+    sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
+    sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
+
+    t = d / (82.28m/s * cos(ø))
+
+    sin(ø) = 1/2 * 9.8m/s² * d / ((82.28m/s)² * cos(ø))
+    sin(ø)cos(ø) = 1/2 * 9.8m/s² * d / 6769.9984m²/s²
+
+    sin(ø)cos(ø) = sin(2ø)/2
+
+    sin(2ø) = 9.8m/s² * d / 6769.9984m²/s²
+    2ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²)
+    ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²) / 2
+
+    Formula: ø = 180/π * sin⁻¹(g * d / v²) / 2
+
+    //New formula w/ Height From several places online:
+
+    tan(ø) = (v² ± √(v⁴ - g(gx² + 2yv²))) / gx
+
+    we want the positive solution if it exists
+
+    so:
+
+    ø = atan(v₀² + √(v₀⁴ - g(gd² + 2h₂v₀²))) / gd
+
+    ////////
+
+    v₀sin(ø)t - 1/2 * gt² = h₂
+
+
+*/

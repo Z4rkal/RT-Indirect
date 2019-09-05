@@ -105,12 +105,12 @@ class Horizon extends Component {
                     startY = Math.floor((WIDTH - start[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    startX = Math.floor((WIDTH - start[0]) / this.props.scale - 1);
+                    startX = Math.floor((WIDTH - start[0]) / this.props.scale);
                     startY = Math.floor((HEIGHT - start[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
                     startX = Math.floor((HEIGHT - start[1]) / this.props.scale);
-                    startY = Math.floor(start[0] / (this.props.scale * spacing) + 1);
+                    startY = Math.floor(start[0] / (this.props.scale * spacing));
                     break;
             }
 
@@ -123,7 +123,7 @@ class Horizon extends Component {
             }
 
             if (lines[startY]) {
-                let rectX = startX * this.props.scale;
+                let rectX = startX * this.props.scale + this.props.scale - 1;
                 let rectY = 400 - (lines[startY][startX] * 400);
                 startLine = startY;
 
@@ -148,12 +148,12 @@ class Horizon extends Component {
                     endY = Math.floor((WIDTH - end[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    endX = Math.floor((WIDTH - end[0]) / this.props.scale - 1);
+                    endX = Math.floor((WIDTH - end[0]) / this.props.scale);
                     endY = Math.floor((HEIGHT - end[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
                     endX = Math.floor((HEIGHT - end[1]) / this.props.scale);
-                    endY = Math.floor(end[0] / (this.props.scale * spacing) + 1);
+                    endY = Math.floor(end[0] / (this.props.scale * spacing));
                     break;
             }
 
@@ -174,7 +174,7 @@ class Horizon extends Component {
             // }
 
             if (lines[endY]) {
-                let rectX = endX * this.props.scale;
+                let rectX = endX * this.props.scale + this.props.scale - 1;
                 let rectY = 400 - (lines[endY][endX] * 400);
                 endLine = endY;
 
@@ -199,25 +199,25 @@ class Horizon extends Component {
                     destY = Math.floor((WIDTH - blam[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    destX = Math.floor((WIDTH - blam[0]) / this.props.scale - 1);
+                    destX = Math.floor((WIDTH - blam[0]) / this.props.scale);
                     destY = Math.floor((HEIGHT - blam[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
                     destX = Math.floor((HEIGHT - blam[1]) / this.props.scale);
-                    destY = Math.floor(blam[0] / (this.props.scale * spacing) + 1);
+                    destY = Math.floor(blam[0] / (this.props.scale * spacing));
                     break;
             }
 
 
 
-            let ΔX = destX * this.props.scale - startX * this.props.scale;
+            let ΔX = (destX - startX) * this.props.scale;
             let ΔY = -(destY - startY) * this.props.scale * spacing;
             let ΔZ;
             let finalZ;
 
             if (destY >= lines.length || destY < 0 || destX >= lines[destY].length || destX < 0) {
                 finalZ = 400;
-                ΔZ = 400 - (400 - lines[startY][startX] * 400);
+                ΔZ = (400 - lines[startY][startX] * 400) - 400;
             }
             else {
                 finalZ = 400 - (lines[destY][destX] * 400);
@@ -243,12 +243,12 @@ class Horizon extends Component {
             let points = new Array(Math.ceil(t * 10));
             points = points.fill(1, 0, points.length);
 
-            let prevPoint = [startX * this.props.scale, 400 - (lines[startY][startX] * 400)];
+            let prevPoint = [startX * this.props.scale + this.props.scale, 400 - (lines[startY][startX] * 400)];
             points = points.map((point, pIndex) => {
                 if (pIndex !== points.length - 1) {
                     let d = `M ${prevPoint[0]} ${prevPoint[1]}`;
                     let xt = prevPoint[0] + (VELOCITY * (0.1) * cX * Math.cos(øZ));
-                    let zt = 400 - (lines[startY][startX] * 400) - (VELOCITY * (pIndex / 10) * Math.sin(øZ) - 1 / 2 * 9.8 * pIndex / 10 * (pIndex / 10));
+                    let zt = 400 - (lines[startY][startX] * 400) - (VELOCITY * ((pIndex + 1) / 10) * Math.sin(øZ) - 1 / 2 * 9.8 * Math.pow((pIndex + 1) / 10, 2));
                     d += ` L ${xt} ${zt}`;
                     prevPoint = [xt, zt];
                     return (d);
@@ -256,7 +256,7 @@ class Horizon extends Component {
                 else {
                     console.log(`last natural Z: ${prevPoint[1]}, target Z: ${finalZ}`);
                     let d = `M ${prevPoint[0]} ${prevPoint[1]}`;
-                    let xt = destX * this.props.scale;
+                    let xt = destX * this.props.scale + this.props.scale;
                     let zt = finalZ;
                     d += ` L ${xt} ${zt}`;
                     prevPoint = [xt, zt];
@@ -271,10 +271,6 @@ class Horizon extends Component {
                     ))}
                 </>
             );
-
-            // shot = (
-            //     <path d={`M ${startX * this.props.scale} ${400 - (lines[startY][startX] * 400) - 40} L ${destX * this.props.scale} ${finalZ}`} stroke='#f7c8d8' fill='transparent' />
-            // );
         }
 
 

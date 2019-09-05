@@ -207,9 +207,22 @@ class Sim extends Component {
         }
         else if (roll < toHit) {
             let error = maxError * (1 - (roll / toHit));
-            let ø = 360 * random();
+            let ø = Math.PI / 180 * 360 * random();
 
-            blam = [x2 + Math.cos(ø) * error, y2 + Math.sin(ø) * error];
+            let bX = x2 + Math.cos(ø) * error;
+            let bY = y2 + Math.sin(ø) * error;
+
+            let trajDist = Math.sqrt(Math.pow(bX - x1, 2) + Math.pow(bY - y1, 2));
+            console.log(trajDist);
+            if (trajDist > 690) {
+                let adjustedDist = 690 - (trajDist - 690);
+                let ratio = adjustedDist / trajDist;
+                //Need to fix this, the math is wrong
+                bX = bX * ratio;
+                bY = bY * ratio;
+            }
+
+            blam = [bX, bY];
 
             //alert(`Miss: ${blam}`);
 

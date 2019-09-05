@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import { type } from 'os';
 
 const HEIGHT = 400;
 const WIDTH = 400;
+
+const VELOCITY = 82.28;
 
 class Horizon extends Component {
     constructor() {
@@ -10,7 +13,7 @@ class Horizon extends Component {
         this.buildHorizonView = this.buildHorizonView.bind(this);
     }
 
-    buildHorizonView(grid, alpha, direction, start, end) {
+    buildHorizonView(grid, alpha, direction, start, end, blam) {
         const spacing = grid.length / 50;
         const height = grid.length, width = grid.length;
 
@@ -84,76 +87,165 @@ class Horizon extends Component {
                 }
         }
 
-        let x = -1;
-        let y = -1;
+        let startX = -1;
+        let startY = -1;
         let startProp = false;
         let startLine = false;
         if (lines && typeof start === 'object' && start[0] >= 0 && start[1] >= 0) {
             switch (direction) {
                 default:
                 case 'north':
-                    x = Math.floor(start[0] / this.props.scale);
-                    y = Math.floor(start[1] / (this.props.scale * spacing));
+                    startX = Math.floor(start[0] / this.props.scale);
+                    startY = Math.floor(start[1] / (this.props.scale * spacing));
                     break;
                 case 'east':
-                    x = Math.floor(start[1] / this.props.scale);
-                    y = Math.floor((WIDTH - start[0]) / (this.props.scale * spacing));
+                    startX = Math.floor(start[1] / this.props.scale);
+                    startY = Math.floor((WIDTH - start[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    x = Math.floor((WIDTH - start[0]) / this.props.scale - 1);
-                    y = Math.floor((HEIGHT - start[1]) / (this.props.scale * spacing));
+                    startX = Math.floor((WIDTH - start[0]) / this.props.scale - 1);
+                    startY = Math.floor((HEIGHT - start[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
-                    x = Math.floor((HEIGHT - start[1]) / this.props.scale);
-                    y = Math.floor(start[0] / (this.props.scale * spacing) + 1);
+                    startX = Math.floor((HEIGHT - start[1]) / this.props.scale);
+                    startY = Math.floor(start[0] / (this.props.scale * spacing) + 1);
                     break;
             }
 
-            if (lines[y]) {
-                let rectX = x * this.props.scale + this.props.scale;
-                let rectY = 400 - (lines[y][x] * 400);
-                startLine = y;
+            if (startY >= lines.length) {
+                startY = lines.length - 1;
+            }
+
+            if (startX >= lines[startY].length) {
+                startX = lines[startY].length - 1;
+            }
+
+            if (lines[startY]) {
+                let rectX = startX * this.props.scale + this.props.scale;
+                let rectY = 400 - (lines[startY][startX] * 400);
+                startLine = startY;
 
                 startProp = (<rect x={rectX} y={rectY - 40} height='40' width='3' fill={start[2] || '#f7c9d9'} />);
             }
-            else console.log(y);
+            else console.log(startY);
         }
 
-        x = -1;
-        y = -1;
+        let endX = -1;
+        let endY = -1;
         let endProp = false;
         let endLine = false;
         if (lines && typeof end === 'object' && end[0] >= 0 && end[1] >= 0) {
             switch (direction) {
                 default:
                 case 'north':
-                    x = Math.floor(end[0] / this.props.scale);
-                    y = Math.floor(end[1] / (this.props.scale * spacing));
+                    endX = Math.floor(end[0] / this.props.scale);
+                    endY = Math.floor(end[1] / (this.props.scale * spacing));
                     break;
                 case 'east':
-                    x = Math.floor(end[1] / this.props.scale);
-                    y = Math.floor((WIDTH - end[0]) / (this.props.scale * spacing));
+                    endX = Math.floor(end[1] / this.props.scale);
+                    endY = Math.floor((WIDTH - end[0]) / (this.props.scale * spacing));
                     break;
                 case 'south':
-                    x = Math.floor((WIDTH - end[0]) / this.props.scale - 1);
-                    y = Math.floor((HEIGHT - end[1]) / (this.props.scale * spacing));
+                    endX = Math.floor((WIDTH - end[0]) / this.props.scale - 1);
+                    endY = Math.floor((HEIGHT - end[1]) / (this.props.scale * spacing));
                     break;
                 case 'west':
-                    x = Math.floor((HEIGHT - end[1]) / this.props.scale);
-                    y = Math.floor(end[0] / (this.props.scale * spacing) + 1);
+                    endX = Math.floor((HEIGHT - end[1]) / this.props.scale);
+                    endY = Math.floor(end[0] / (this.props.scale * spacing) + 1);
                     break;
             }
 
-            if (lines[y]) {
-                let rectX = x * this.props.scale + this.props.scale;
-                let rectY = 400 - (lines[y][x] * 400);
-                endLine = y;
+            if (endY >= lines.length) {
+                endY = lines.length - 1;
+            }
+
+            if (endX >= lines[endY].length) {
+                endX = lines[endY].length - 1;
+            }
+
+            if (lines[endY]) {
+                let rectX = endX * this.props.scale + this.props.scale;
+                let rectY = 400 - (lines[endY][endX] * 400);
+                endLine = endY;
 
                 endProp = (<rect x={rectX} y={rectY - 40} height='40' width='3' fill={end[2] || '#a700a7'} />);
             }
-            else console.log(y);
+            else console.log(endY);
         }
 
+        let destX = -1;
+        let destY = -1;
+        let shotLine = false;
+        let shot = false;
+        if (typeof blam === 'object' && typeof blam[0] === 'number' && typeof blam[1] === 'number') {
+            switch (direction) {
+                default:
+                case 'north':
+                    destX = Math.floor(blam[0] / this.props.scale);
+                    destY = Math.floor(blam[1] / (this.props.scale * spacing));
+                    break;
+                case 'east':
+                    destX = Math.floor(blam[1] / this.props.scale);
+                    destY = Math.floor((WIDTH - blam[0]) / (this.props.scale * spacing));
+                    break;
+                case 'south':
+                    destX = Math.floor((WIDTH - blam[0]) / this.props.scale - 1);
+                    destY = Math.floor((HEIGHT - blam[1]) / (this.props.scale * spacing));
+                    break;
+                case 'west':
+                    destX = Math.floor((HEIGHT - blam[1]) / this.props.scale);
+                    destY = Math.floor(blam[0] / (this.props.scale * spacing) + 1);
+                    break;
+            }
+
+
+
+            let finalX = destX * this.props.scale + this.props.scale;
+            let finalY;
+
+            if (destY >= lines.length || destY < 0 || destX >= lines[destY].length || destX < 0) finalY = 400;
+            else finalY = 400 - (lines[destY][destX] * 400);
+
+            shotLine = destY;
+
+            let dist = Math.sqrt(Math.pow((destX - startX) * this.props.scale, 2) + Math.pow((destY - startY) * this.props.scale * spacing, 2));
+
+            //This equation doesn't date elevation into account so I need to make it more complicated :(
+            let øᵧ = 90 - (180 / Math.PI) * Math.asin(9.8 * dist / Math.pow(VELOCITY, 2)) / 2;
+            console.log(`Dist: ${dist}, Theta: ${øᵧ}`);
+        }
+
+        /*
+            Have:
+                -v = 82.28m/s
+                -d = (dist)m;
+                -g = 9.8m/s²
+
+            Need Theta (ø) and time (t):
+
+            82.28m/s * cos(ø) * t = d
+            t = d / (82.28m/s * cos(ø))
+
+            82.28m/s * sin(ø) * t - 1/2 * 9.8m/s² * t² = 0m
+            t(82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t) = 0m
+
+            t = 0 is solution one, but we don't care about it
+
+            82.28m/s * sin(ø) - 1/2 * 9.8m/s² * t = 0m
+            82.28m/s * sin(ø) = 1/2 * 9.8m/s² * t
+            sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
+            sin(ø) = 1/2 * 9.8m/s² * t / 82.28m/s
+            sin(ø) = 1/2 * 9.8m/s² * d / ((82.28m/s)² * cos(ø))
+            sin(ø)cos(ø) = 1/2 * 9.8m/s² * d / 6769.9984m²/s²
+
+            sin(ø)cos(ø) = sin(2ø)/2
+
+            sin(2ø) = 9.8m/s² * d / 6769.9984m²/s²
+            2ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²)
+            ø = sin⁻¹(9.8m/s² * d / 6769.9984m²/s²) / 2
+
+            Formula: ø = 180/π * sin⁻¹(g * d / v²) / 2
+        */
 
         return (
             <>
@@ -164,6 +256,7 @@ class Horizon extends Component {
                             <React.Fragment key={`line ${cIndex}`}>
                                 {startProp && startLine === cIndex ? startProp : null}
                                 {endProp && endLine === cIndex ? endProp : null}
+                                {shot && shotLine === cIndex ? shot : null}
                                 <path d={`M 0 400 L 0 ${400 - (col[0] * 400)} ${col.reduce((prev, value, rIndex) => {
                                     value = 400 - (value * 400)
                                     return prev + (` L ${rIndex * this.props.scale + this.props.scale} ${value}`)
@@ -176,14 +269,14 @@ class Horizon extends Component {
     }
 
     render() {
-        const { start, end, grid, alpha, direction } = this.props;
+        const { start, end, blam, grid, alpha, direction } = this.props;
 
         return (
             <div id='horizon-container'>
                 <label id='horizon-label' htmlFor='horizon-svg'>Horizon View</label>
                 <svg id='horizon-svg' height={`${HEIGHT}px`} width={`${WIDTH}px`}>
                     <rect x='0' y='0' height={HEIGHT} width={WIDTH} fill='#ffffff' />
-                    {this.buildHorizonView(grid, alpha, direction, start, end)}
+                    {this.buildHorizonView(grid, alpha, direction, start, end, blam)}
                 </svg>
             </div>
         );

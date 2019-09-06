@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 
 import Sim from './controllers/Sim';
-import CurveTest from './fields/CurveTest';
+import Canvas from './fields/Canvas';
+//import CurveTest from './fields/CurveTest';
 
 class App extends Component {
     constructor() {
@@ -94,37 +95,42 @@ class App extends Component {
         const { startPoint, controlPoint, endPoint } = this.state;
         return (
             <>
-                <div id='curve-container'>
-                    <div id='curve-input-container'>
-                        <label>Start Point</label>
-                        <div className='input-group'>
-                            <label>X:</label>
-                            <input type='text' value={startPoint[0]} onChange={(e) => this.updateInput('startPoint', [e.target.value, startPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 's1'); }}></input>
-                            <label>Y:</label>
-                            <input type='text' value={startPoint[1]} onChange={(e) => this.updateInput('startPoint', [startPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 's2'); }}></input>
-                        </div>
-                        <label>Control Point</label>
-                        <div className='input-group'>
-                            <label>X:</label>
-                            <input type='text' value={controlPoint[0]} onChange={(e) => this.updateInput('controlPoint', [e.target.value, controlPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'c1'); }}></input>
-                            <label>Y:</label>
-                            <input type='text' value={controlPoint[1]} onChange={(e) => this.updateInput('controlPoint', [controlPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'c2'); }}></input>
-                        </div>
-                        <label>End Point</label>
-                        <div className='input-group'>
-                            <label>X:</label>
-                            <input type='text' value={endPoint[0]} onChange={(e) => this.updateInput('endPoint', [e.target.value, endPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'e1'); }}></input>
-                            <label>Y:</label>
-                            <input type='text' value={endPoint[1]} onChange={(e) => this.updateInput('endPoint', [endPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'e2'); }}></input>
-                        </div>
-                    </div>
-                    <CurveTest startPoint={startPoint} controlPoint={controlPoint} endPoint={endPoint} />
-                </div>
-                <hr />
                 <Sim startPoint={startPoint} controlPoint={controlPoint} endPoint={endPoint} />
+                <hr id='app-break'/>
+                <Canvas />
             </>
         );
     }
 }
 
 export default App;
+
+/*
+    <hr id='curve-break'/>
+    <div id='curve-container'>
+        <div id='curve-input-container'>
+            <label>Start Point</label>
+            <div className='input-group'>
+                <label>X:</label>
+                <input type='text' value={startPoint[0]} onChange={(e) => this.updateInput('startPoint', [e.target.value, startPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 's1'); }}></input>
+                <label>Y:</label>
+                <input type='text' value={startPoint[1]} onChange={(e) => this.updateInput('startPoint', [startPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 's2'); }}></input>
+            </div>
+            <label>Control Point</label>
+            <div className='input-group'>
+                <label>X:</label>
+                <input type='text' value={controlPoint[0]} onChange={(e) => this.updateInput('controlPoint', [e.target.value, controlPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'c1'); }}></input>
+                <label>Y:</label>
+                <input type='text' value={controlPoint[1]} onChange={(e) => this.updateInput('controlPoint', [controlPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'c2'); }}></input>
+            </div>
+            <label>End Point</label>
+            <div className='input-group'>
+                <label>X:</label>
+                <input type='text' value={endPoint[0]} onChange={(e) => this.updateInput('endPoint', [e.target.value, endPoint[1]])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'e1'); }}></input>
+                <label>Y:</label>
+                <input type='text' value={endPoint[1]} onChange={(e) => this.updateInput('endPoint', [endPoint[0], e.target.value])} onKeyDown={(e) => { e.persist(); this.handleUpDown(e, 'e2'); }}></input>
+            </div>
+        </div>
+        <CurveTest startPoint={startPoint} controlPoint={controlPoint} endPoint={endPoint} />
+    </div>
+*/

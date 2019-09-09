@@ -22,7 +22,7 @@ class Bird extends Component {
                         {col.map((value, rIndex) => {
                             value = Math.round(value * 15);
                             let hex = 5 + value * 16.7;
-                            return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height='10' width='10' fill={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} />);
+                            return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height={this.props.scale} width={this.props.scale} fill={`rgb(${hex},${hex * 1.25},${hex * 1.25})`} />);
                         })}
                     </React.Fragment>
                 ))}
@@ -37,7 +37,7 @@ class Bird extends Component {
                     <React.Fragment key={cIndex} >
                         {col.map((value, rIndex) => {
                             value = 255 * value;
-                            return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height='10' width='10' fill={`rgb(${value},${value},${value})`} />)
+                            return (<rect key={`${cIndex}, ${rIndex}`} x={rIndex * this.props.scale} y={cIndex * this.props.scale} height={this.props.scale} width={this.props.scale} fill={`rgb(${value},${value},${value})`} />)
                         })}
                     </React.Fragment>
                 ))}

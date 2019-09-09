@@ -95,6 +95,7 @@ class App extends Component {
         const { startPoint, controlPoint, endPoint } = this.state;
         return (
             <>
+                <h1 className='title'>Indirect Fire Simulator</h1>
                 <Sim startPoint={startPoint} controlPoint={controlPoint} endPoint={endPoint} />
                 <hr id='app-break'/>
                 <Canvas />

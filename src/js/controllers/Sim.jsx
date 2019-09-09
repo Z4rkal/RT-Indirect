@@ -190,8 +190,13 @@ class Sim extends Component {
         const yDist = y2 - y1;
         const dist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
 
-        const toHit = 0.85;
-        const maxError = Math.min(Math.max(dist / 690 * 240, 20), dist / 2);
+        const toHit = 0.85; //Arbitrary number for testing
+
+        const MAX_RANGE = 690;
+        const MAX_maxError = 240;
+        const MIN_maxError = 20;
+
+        const maxError = Math.min(Math.max(dist / MAX_RANGE * MAX_maxError, MIN_maxError), MAX_maxError);
 
         const roll = random();
 
@@ -211,8 +216,8 @@ class Sim extends Component {
             let bY = y2 + Math.sin(ø) * error;
 
             let trajDist = Math.sqrt(Math.pow(bX - x1, 2) + Math.pow(bY - y1, 2));
-            if (trajDist > 690) {
-                let adjustedDist = 690 - (trajDist - 690);
+            if (trajDist > MAX_RANGE) {
+                let adjustedDist = MAX_RANGE - (trajDist - MAX_RANGE);
                 let ratio = adjustedDist / trajDist;
 
                 bX = -(x1 - bX) * ratio + x1;
